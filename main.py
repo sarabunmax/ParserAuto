@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 URL = 'https://www.olx.ua/d/uk/transport/legkovye-avtomobili/bmw' \
-      '/?currency=UAH&search%5Bfilter_enum_model%5D%5B0%5D=7-series '
+      '/?currency=UAH&search%5Bfilter_enum_model%5D%5B0%5D=7-series'
 
 
 # function for getting html page
@@ -15,10 +15,9 @@ def get_html(url):
 
 
 # function for extract data from html page
-def data_parsing(data_page):
-    soup = BeautifulSoup(data_page, 'lxml')
+def html_parsing(html_page, data_stoarage: list):
+    soup = BeautifulSoup(html_page, 'lxml')
     links = list(soup.find_all('a', class_='css-1bbgabe'))  # storage for saving links
-    auto = []  # storage for saving data auto
 
     for link in links:
         html_car = req.get('https://www.olx.ua' + link.get('href')).text
@@ -32,8 +31,7 @@ def data_parsing(data_page):
                 if re.search(r'Рік випуску: .*', d.text):
                     data['Release date'] = re.search(r'\d\d\d\d', d.text).group(0)
 
-            auto.append(data)
-    return auto
+            data_stoarage.append(data)
 
 
 # function for painting analytic gistogram
@@ -51,12 +49,27 @@ def gistograme(data: list):
         else:
             price[int(value['Release date'])].append(
                 int(re.search(r'\d+', value['Price'].replace(' ', '')).group()) / 37)
+    # print(price)
+    # for key, value in price.items():
+    #     price[key] = int(np.average(value))
+    #
+    # plt.bar(price.keys(), price.values())
+    # plt.show()
 
-    for key, value in price.items():
-        price[key] = int(np.average(value))
 
-    plt.bar(price.keys(), price.values())
-    plt.show()
+page_numb = 1
+autos_info = []
+last_size = 1
+# html_parsing(get_html(f'{URL}&page={page_numb}'), autos_info)
 
-autos = data_parsing(get_html(URL))
-gistograme(autos)
+while True:
+
+    if len(autos_info) != last_size:
+        last_size = len(autos_info)
+        html_parsing(get_html(f'{URL}&page={page_numb}'), autos_info)
+        page_numb += 1
+    else:
+        break
+
+print(len(autos_info))
+#gistograme(autos_info)
