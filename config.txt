@@ -1,0 +1,3 @@
+mark: 'BMW'
+model: '7 Series'
+directory: 'C:\\Users\\Sarab\\Desktop'
